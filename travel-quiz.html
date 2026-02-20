@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Where Should I Travel? ✈️</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #080810;
+  --surface: #12121e;
+  --surface2: #1a1a2e;
+  --border: rgba(255,255,255,0.07);
+  --text: #e8e8f0;
+  --muted: #6c6c82;
+  --radius: 20px;
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(124,58,237,.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(6,182,212,.10) 0%, transparent 50%),
+    radial-gradient(ellipse at 60% 80%, rgba(236,72,153,.08) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+#app {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 640px;
+  animation: fadeUp .5s var(--ease) both;
+}
+.screen.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── INTRO ─── */
+.intro-card {
+  text-align: center;
+  padding: 64px 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.intro-plane {
+  font-size: 72px;
+  display: block;
+  margin-bottom: 24px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0) rotate(-5deg); }
+  50%      { transform: translateY(-14px) rotate(5deg); }
+}
+
+.intro-title {
+  font-size: clamp(28px, 6vw, 46px);
+  font-weight: 900;
+  background: linear-gradient(135deg, #a78bfa, #38bdf8, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 14px;
+  line-height: 1.15;
+}
+
+.intro-sub {
+  color: var(--muted);
+  font-size: 16px;
+  max-width: 360px;
+  margin: 0 auto 40px;
+}
+
+.btn-start {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 44px;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 24px rgba(124,58,237,.45);
+  letter-spacing: .3px;
+}
+.btn-start:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(124,58,237,.65); }
+.btn-start:active { transform: translateY(0); }
+
+.intro-pills {
+  margin-top: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 13px;
+}
+.intro-pills span { display: flex; align-items: center; gap: 5px; }
+
+/* ─── QUIZ ─── */
+.quiz-header { margin-bottom: 28px; }
+
+.progress-track {
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #7c3aed, #38bdf8);
+  border-radius: 10px;
+  transition: width .45s var(--ease);
+}
+.progress-label { color: var(--muted); font-size: 13px; text-align: right; }
+
+.question-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 40px;
+}
+
+.q-num {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: #7c3aed;
+  margin-bottom: 10px;
+}
+
+.q-text {
+  font-size: clamp(20px, 3.5vw, 27px);
+  font-weight: 700;
+  margin-bottom: 28px;
+  line-height: 1.3;
+}
+
+.options { display: grid; gap: 11px; }
+
+.opt-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 20px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .2s, border-color .2s, transform .2s;
+  text-align: left;
+  width: 100%;
+}
+.opt-btn:hover {
+  background: rgba(124,58,237,.15);
+  border-color: rgba(124,58,237,.45);
+  transform: translateX(5px);
+}
+.opt-btn.selected {
+  background: rgba(124,58,237,.22);
+  border-color: #7c3aed;
+}
+.opt-emoji { font-size: 24px; width: 34px; text-align: center; flex-shrink: 0; }
+
+/* ─── LOADING ─── */
+.loading-card {
+  text-align: center;
+  padding: 80px 40px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.loader-icon {
+  font-size: 66px;
+  display: block;
+  margin-bottom: 24px;
+  animation: spin 1.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-title {
+  font-size: 22px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.loading-sub { color: var(--muted); font-size: 14px; }
+
+.dots { display: inline-flex; gap: 7px; margin-top: 24px; }
+.dot {
+  width: 9px; height: 9px;
+  border-radius: 50%;
+  background: #7c3aed;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+.dot:nth-child(2) { animation-delay: .18s; background: #38bdf8; }
+.dot:nth-child(3) { animation-delay: .36s; background: #f472b6; }
+
+@keyframes pulse {
+  0%,80%,100% { transform: scale(.55); opacity: .35; }
+  40%          { transform: scale(1);   opacity: 1; }
+}
+
+/* ─── RESULT ─── */
+.result-card {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.result-hero {
+  padding: 52px 40px 44px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+.float-emojis { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.fe {
+  position: absolute;
+  font-size: 36px;
+  opacity: .13;
+  animation: drift 7s ease-in-out infinite;
+}
+@keyframes drift {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  33%      { transform: translateY(-12px) rotate(6deg); }
+  66%      { transform: translateY(7px) rotate(-4deg); }
+}
+
+.result-emoji {
+  font-size: 80px;
+  display: block;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 0 28px rgba(255,255,255,.28));
+  animation: popIn .5s cubic-bezier(.175,.885,.32,1.275) .2s both;
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.result-name {
+  font-size: clamp(34px, 7vw, 52px);
+  font-weight: 900;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 20px rgba(0,0,0,.3);
+  line-height: 1.05;
+}
+.result-country {
+  color: rgba(255,255,255,.68);
+  font-size: 15px;
+  margin-top: 6px;
+  position: relative;
+  z-index: 1;
+  font-weight: 500;
+}
+.result-tagline {
+  color: rgba(255,255,255,.82);
+  font-size: 14px;
+  font-style: italic;
+  margin-top: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.result-body {
+  background: var(--surface);
+  padding: 36px 40px;
+}
+
+.result-desc {
+  font-size: 15px;
+  line-height: 1.85;
+  color: #c4c4d8;
+  margin-bottom: 32px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.mood-grid {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+.mood-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 15px;
+  font-size: 28px;
+  cursor: default;
+  transition: transform .2s;
+  animation: popIn .4s cubic-bezier(.175,.885,.32,1.275) both;
+}
+.mood-item:hover { transform: scale(1.18) rotate(6deg); }
+
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 32px;
+}
+.hl-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.hl-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #38bdf8);
+  flex-shrink: 0;
+}
+
+.result-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+.btn-retake {
+  flex: 1; min-width: 140px;
+  padding: 14px 24px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+}
+.btn-retake:hover { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.18); }
+
+.btn-share {
+  flex: 1; min-width: 140px;
+  padding: 14px 24px;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  border: none;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  box-shadow: 0 4px 16px rgba(124,58,237,.35);
+}
+.btn-share:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(124,58,237,.55); }
+
+/* ─── CONFETTI ─── */
+.confetti {
+  position: fixed;
+  top: -10px;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 9999;
+  animation: fall linear both;
+}
+@keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+/* ─── TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1c1c28;
+  border: 1px solid rgba(255,255,255,.1);
+  color: #fff;
+  padding: 12px 26px;
+  border-radius: 50px;
+  font-size: 14px;
+  font-weight: 600;
+  z-index: 9998;
+  animation: fadeUp .3s var(--ease);
+  box-shadow: 0 4px 24px rgba(0,0,0,.45);
+  white-space: nowrap;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 580px) {
+  .intro-card, .question-card, .loading-card { padding: 32px 22px; }
+  .result-hero { padding: 40px 22px 34px; }
+  .result-body { padding: 28px 22px; }
+  .highlights-grid { grid-template-columns: 1fr; }
+  .result-actions { flex-direction: column; }
+  .intro-pills { gap: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ── INTRO ── -->
+  <div id="screen-intro" class="screen active">
+    <div class="intro-card">
+      <span class="intro-plane">✈️</span>
+      <h1 class="intro-title">Where Should<br>I Travel?</h1>
+      <p class="intro-sub">Answer 5 quick questions and we'll match you with your perfect destination from around the world.</p>
+      <button class="btn-start" onclick="startQuiz()">Start Quiz <span>→</span></button>
+      <div class="intro-pills">
+        <span>🌍 12 Destinations</span>
+        <span>⚡ 2 Minutes</span>
+        <span>🎯 5 Questions</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── QUIZ ── -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-header">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-label" id="progress-label"></div>
+    </div>
+    <div class="question-card">
+      <div class="q-num" id="q-num"></div>
+      <h2 class="q-text" id="q-text"></h2>
+      <div class="options" id="options"></div>
+    </div>
+  </div>
+
+  <!-- ── LOADING ── -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-card">
+      <span class="loader-icon">🌍</span>
+      <div class="loading-title">Finding Your Perfect Destination</div>
+      <div class="loading-sub">Analyzing your travel personality…</div>
+      <div class="dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULT (rendered by JS) ── -->
+  <div id="screen-result" class="screen"></div>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   DATA
+═══════════════════════════════════════ */
+const QUESTIONS = [
+  {
+    text: "What's your ideal travel vibe?",
+    opts: [
+      { id:'adventure', e:'⚡', t:'Adventure & thrills' },
+      { id:'relax',     e:'🌊', t:'Relaxation & beaches' },
+      { id:'culture',   e:'🏛️', t:'Culture & history' },
+      { id:'city',      e:'🌆', t:'City energy & nightlife' },
+      { id:'nature',    e:'🌿', t:'Nature & landscapes' },
+    ]
+  },
+  {
+    text: 'What weather puts you in holiday mode?',
+    opts: [
+      { id:'hot',     e:'☀️', t:'Hot & sunny' },
+      { id:'cool',    e:'🍂', t:'Cool & crisp' },
+      { id:'trop',    e:'🌴', t:'Tropical & lush' },
+      { id:'cold',    e:'❄️', t:'Cold & dramatic' },
+      { id:'mild',    e:'🌤️', t:'Mild & pleasant' },
+    ]
+  },
+  {
+    text: 'How do you like to travel?',
+    opts: [
+      { id:'budget',   e:'🎒', t:'Budget backpacker' },
+      { id:'luxury',   e:'💎', t:'Full luxury experience' },
+      { id:'solo',     e:'🚶', t:'Solo explorer' },
+      { id:'group',    e:'👨‍👩‍👧', t:'Group or family fun' },
+      { id:'romantic', e:'💑', t:'Romantic getaway' },
+    ]
+  },
+  {
+    text: 'Which activity excites you most?',
+    opts: [
+      { id:'extreme', e:'🪂', t:'Extreme sports' },
+      { id:'food',    e:'🍜', t:'Food & local markets' },
+      { id:'art',     e:'🎨', t:'Museums & galleries' },
+      { id:'beach',   e:'🏄', t:'Beaches & water sports' },
+      { id:'hiking',  e:'🥾', t:'Hiking & wildlife' },
+    ]
+  },
+  {
+    text: "What's your vibe after dark?",
+    opts: [
+      { id:'nightlife', e:'🎉', t:'Epic clubs & dancing' },
+      { id:'dinner',    e:'🍷', t:'Quiet dinners & wine' },
+      { id:'street',    e:'🌮', t:'Street food & local bars' },
+      { id:'stars',     e:'🌌', t:'Stargazing & campfires' },
+      { id:'cozy',      e:'☕', t:'Cozy cafes & bookshops' },
+    ]
+  }
+];
+
+const DESTINATIONS = [
+  {
+    id:'tokyo', name:'Tokyo', country:'Japan', e:'🗼',
+    tagline:'Where neon dreams meet ancient tradition',
+    grad:['#7c3aed','#1d4ed8'],
+    mood:['🌸','🤖','🍜','🎮','🏙️','⚡'],
+    desc:'Tokyo pulses with electric energy unlike anywhere on Earth. Ancient shrines hide between towering skyscrapers, world-class ramen fuels midnight adventures, and every alley holds a discovery waiting to blow your mind.',
+    hl:['Shibuya Crossing','Robot Restaurant','Tsukiji Fish Market','Harajuku Street Style'],
+  },
+  {
+    id:'bali', name:'Bali', country:'Indonesia', e:'🌴',
+    tagline:'The Island of the Gods and perfect sunsets',
+    grad:['#059669','#0891b2'],
+    mood:['🌴','🌺','🏄','🛕','🌅','🍹'],
+    desc:'Bali bewitches every kind of traveler. Surf legendary waves at Uluwatu, find inner peace in Ubud\'s emerald rice terraces, or simply sip coconuts on a black sand beach as the sun melts into the Indian Ocean.',
+    hl:['Uluwatu Surfing','Ubud Rice Terraces','Tanah Lot Temple','Seminyak Sunsets'],
+  },
+  {
+    id:'iceland', name:'Iceland', country:'Nordic Europe', e:'🧊',
+    tagline:'Where fire, ice, and the northern lights collide',
+    grad:['#1e40af','#0e7490'],
+    mood:['🌋','🧊','🌌','🐋','♨️','🦅'],
+    desc:'Iceland is the planet turned inside out. Chase the aurora borealis across a black sky, hike active volcanoes, soak in geothermal lagoons, and watch geysers erupt. No two days are ever the same here.',
+    hl:['Northern Lights','Blue Lagoon','Golden Circle','Jökulsárlón Glacier'],
+  },
+  {
+    id:'nyc', name:'New York City', country:'United States', e:'🗽',
+    tagline:'The city that never sleeps — and never disappoints',
+    grad:['#dc2626','#ea580c'],
+    mood:['🗽','🌆','🎭','🍕','🎷','🚕'],
+    desc:'New York City is pure electricity. World-class food from every corner of the globe, a cultural scene that sets global trends, iconic skylines you\'ve seen a thousand times but still can\'t believe are real.',
+    hl:['Central Park','Brooklyn Bridge','Broadway Shows','World-class Dining'],
+  },
+  {
+    id:'santorini', name:'Santorini', country:'Greece', e:'🏛️',
+    tagline:'Sunsets, white walls, and infinite blue',
+    grad:['#2563eb','#9333ea'],
+    mood:['🌅','🏛️','🍷','⛵','🤍','🐬'],
+    desc:'Santorini is a dream you don\'t want to wake from. Perched on a volcanic caldera, its iconic white-washed villages cascade toward a shimmering Aegean Sea — perfect for romance, fine wine, and legendary sunsets.',
+    hl:['Oia Sunset','Caldera Views','Akrotiri Ruins','Wine & Fresh Seafood'],
+  },
+  {
+    id:'patagonia', name:'Patagonia', country:'Argentina & Chile', e:'🏔️',
+    tagline:'The edge of the world — the peak of adventure',
+    grad:['#0f766e','#1e3a5f'],
+    mood:['🏔️','🦅','🌊','🧗','🌬️','⛺'],
+    desc:'Patagonia is raw, wild, and breathtaking beyond description. Trek through Torres del Paine, witness calving glaciers, camp beneath a sky impossibly crowded with stars. This is the Earth at its most untamed.',
+    hl:['Torres del Paine','Perito Moreno Glacier','Los Glaciares NP','Wild Camping'],
+  },
+  {
+    id:'marrakech', name:'Marrakech', country:'Morocco', e:'🕌',
+    tagline:'A sensory explosion of spice, color, and soul',
+    grad:['#b45309','#dc2626'],
+    mood:['🕌','🌹','🍊','🏺','🎭','🌙'],
+    desc:'Marrakech grabs all your senses at once. Lose yourself in the medina\'s labyrinthine souks, feast on tagine under a starlit sky, hear the call to prayer echo across terracotta rooftops. Nowhere else feels like this.',
+    hl:['Djemaa el-Fna','The Medina Souks','Majorelle Garden','Atlas Mountains'],
+  },
+  {
+    id:'maldives', name:'Maldives', country:'Indian Ocean', e:'🌊',
+    tagline:"Paradise isn't a place — it's a feeling",
+    grad:['#0284c7','#0d9488'],
+    mood:['🐠','🌊','🏝️','🤿','🦈','🌴'],
+    desc:'The Maldives is the definition of paradise. Overwater bungalows float above crystal lagoons teeming with marine life. Dive with manta rays, eat fresh seafood at the water\'s edge, and forget the world exists.',
+    hl:['Overwater Villas','Manta Ray Diving','Bioluminescent Beaches','Sunset Cruises'],
+  },
+  {
+    id:'paris', name:'Paris', country:'France', e:'🗼',
+    tagline:"L'amour, l'art, et la crème brûlée",
+    grad:['#9333ea','#ec4899'],
+    mood:['🗼','🥐','🍷','🎨','💐','🌙'],
+    desc:'Paris never grows old. Every arrondissement holds centuries of stories. Lose yourself in the Louvre, sip café au lait at a zinc bar, stroll the Seine at dusk, and fall in love — with the city, or whoever you\'re with.',
+    hl:['The Louvre','Le Marais District','Montmartre at Dusk','Versailles Day Trip'],
+  },
+  {
+    id:'kyoto', name:'Kyoto', country:'Japan', e:'⛩️',
+    tagline:'Ancient Japan, perfectly preserved in time',
+    grad:['#be185d','#7c3aed'],
+    mood:['⛩️','🌸','🍵','🦊','🎋','🌙'],
+    desc:'Kyoto moves at a different pace. Thousands of vermilion torii gates wind through forested hills. Zen gardens invite stillness. Cherry blossoms drift like snow in spring. This is Japan before the modern world.',
+    hl:['Fushimi Inari','Arashiyama Bamboo','Gion Geisha District','Kinkaku-ji Temple'],
+  },
+  {
+    id:'rio', name:'Rio de Janeiro', country:'Brazil', e:'🎭',
+    tagline:'Samba, sunshine, and the cidade maravilhosa',
+    grad:['#16a34a','#ca8a04'],
+    mood:['🎭','🏖️','💃','🦜','⛰️','🌅'],
+    desc:'Rio de Janeiro is pure joy. Ipanema beach stretches endlessly, Christ the Redeemer watches over the city from above, and the night never really ends. Rio\'s energy is infectious — everyone dances eventually.',
+    hl:['Ipanema Beach','Christ the Redeemer','Carnival Season','Favela Art Tours'],
+  },
+  {
+    id:'queenstown', name:'Queenstown', country:'New Zealand', e:'🎿',
+    tagline:'The adventure capital of the world',
+    grad:['#0369a1','#15803d'],
+    mood:['🎿','🪂','🏔️','🚵','⛷️','🌊'],
+    desc:'Queenstown is where adrenaline junkies make pilgrimage. Bungee jump from bridges, skydive over lakes, ski world-class slopes, then descend into a charming lakeside town that parties as hard as it plays.',
+    hl:['Bungee Jumping','Milford Sound','Ski Fields','Lord of the Rings Tours'],
+  },
+];
+
+/* scoring map: answerId → { destId: pts } */
+const WEIGHTS = {
+  // Q1 vibe
+  adventure:  { queenstown:3, patagonia:3, iceland:2, bali:1 },
+  relax:      { maldives:3, bali:3, santorini:2, rio:1 },
+  culture:    { kyoto:3, marrakech:3, paris:2, tokyo:1 },
+  city:       { nyc:3, tokyo:2, rio:2, paris:1 },
+  nature:     { iceland:3, patagonia:3, queenstown:2, bali:1 },
+  // Q2 weather
+  hot:        { maldives:3, bali:2, santorini:2, marrakech:2, rio:1 },
+  cool:       { iceland:3, patagonia:2, queenstown:2, nyc:1 },
+  trop:       { bali:3, maldives:2, rio:2, tokyo:1 },
+  cold:       { iceland:3, queenstown:2, patagonia:2 },
+  mild:       { paris:3, kyoto:2, santorini:2, nyc:1 },
+  // Q3 style
+  budget:     { bali:3, marrakech:3, tokyo:2, kyoto:1 },
+  luxury:     { maldives:3, santorini:2, paris:2, nyc:1 },
+  solo:       { tokyo:3, iceland:2, nyc:2, kyoto:2 },
+  group:      { rio:3, nyc:2, bali:2, paris:1 },
+  romantic:   { paris:3, santorini:3, maldives:2, kyoto:1 },
+  // Q4 activity
+  extreme:    { queenstown:3, patagonia:3, iceland:2, bali:1 },
+  food:       { tokyo:3, marrakech:3, nyc:2, paris:2 },
+  art:        { paris:3, nyc:2, kyoto:2, marrakech:1 },
+  beach:      { maldives:3, bali:3, santorini:2, rio:2 },
+  hiking:     { patagonia:3, iceland:3, queenstown:2, bali:1 },
+  // Q5 night
+  nightlife:  { rio:3, nyc:3, tokyo:2, bali:1 },
+  dinner:     { paris:3, santorini:2, kyoto:2, nyc:1 },
+  street:     { tokyo:3, marrakech:3, bali:2, nyc:1 },
+  stars:      { iceland:3, patagonia:3, queenstown:2 },
+  cozy:       { paris:3, kyoto:3, nyc:1, santorini:1 },
+};
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let qIdx = 0;
+let scores = {};
+
+/* ═══════════════════════════════════════
+   SCREEN HELPERS
+═══════════════════════════════════════ */
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  el.style.animation = 'none';
+  el.offsetHeight; // reflow
+  el.style.animation = '';
+  el.classList.add('active');
+}
+
+/* ═══════════════════════════════════════
+   QUIZ FLOW
+═══════════════════════════════════════ */
+function startQuiz() {
+  qIdx = 0;
+  scores = {};
+  DESTINATIONS.forEach(d => { scores[d.id] = 0; });
+  renderQuestion();
+  show('screen-quiz');
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[qIdx];
+  const pct = (qIdx / QUESTIONS.length) * 100;
+
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Question ${qIdx + 1} of ${QUESTIONS.length}`;
+  document.getElementById('q-num').textContent = `Question ${qIdx + 1}`;
+  document.getElementById('q-text').textContent = q.text;
+
+  const container = document.getElementById('options');
+  container.innerHTML = '';
+  q.opts.forEach(o => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-emoji">${o.e}</span><span>${o.t}</span>`;
+    btn.onclick = () => pick(o.id, btn);
+    container.appendChild(btn);
+  });
+}
+
+function pick(id, btn) {
+  document.querySelectorAll('.opt-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  const w = WEIGHTS[id] || {};
+  Object.entries(w).forEach(([dest, pts]) => { scores[dest] = (scores[dest] || 0) + pts; });
+
+  setTimeout(() => {
+    qIdx++;
+    if (qIdx < QUESTIONS.length) {
+      renderQuestion();
+    } else {
+      show('screen-loading');
+      setTimeout(showResult, 2300);
+    }
+  }, 380);
+}
+
+/* ═══════════════════════════════════════
+   RESULT
+═══════════════════════════════════════ */
+function showResult() {
+  let best = DESTINATIONS[0], top = -1;
+  DESTINATIONS.forEach(d => { if (scores[d.id] > top) { top = scores[d.id]; best = d; } });
+
+  buildResult(best);
+  show('screen-result');
+  confetti();
+}
+
+function buildResult(d) {
+  const grad = `linear-gradient(135deg, ${d.grad[0]}, ${d.grad[1]})`;
+
+  const floaters = d.mood.map((em, i) => {
+    const pos = [
+      'top:8%;left:6%','top:18%;right:7%','top:55%;left:4%',
+      'top:68%;right:6%','top:38%;left:48%','top:80%;left:28%'
+    ];
+    return `<span class="fe" style="${pos[i]||'top:50%;left:50%'};animation-delay:${i*1.3}s">${em}</span>`;
+  }).join('');
+
+  const moodHtml = d.mood.map((em, i) =>
+    `<div class="mood-item" style="animation-delay:${i*.1}s">${em}</div>`
+  ).join('');
+
+  const hlHtml = d.hl.map(h =>
+    `<div class="hl-item"><span class="hl-dot"></span>${h}</div>`
+  ).join('');
+
+  document.getElementById('screen-result').innerHTML = `
+    <div class="result-card">
+      <div class="result-hero" style="background:${grad}">
+        <div class="float-emojis">${floaters}</div>
+        <span class="result-emoji">${d.e}</span>
+        <div class="result-name">${d.name}</div>
+        <div class="result-country">${d.country}</div>
+        <div class="result-tagline">"${d.tagline}"</div>
+      </div>
+      <div class="result-body">
+        <p class="result-desc">${d.desc}</p>
+        <div class="section-label">Mood Board</div>
+        <div class="mood-grid">${moodHtml}</div>
+        <div class="section-label">You'll Love</div>
+        <div class="highlights-grid">${hlHtml}</div>
+        <div class="result-actions">
+          <button class="btn-retake" onclick="startQuiz()">↩ Retake Quiz</button>
+          <button class="btn-share" onclick="share('${d.name}','${d.country}')">Share Result ↗</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════
+   SHARE
+═══════════════════════════════════════ */
+function share(name, country) {
+  const txt = `I should travel to ${name}, ${country}! 🌍 Take the quiz: ${location.href}`;
+  if (navigator.share) {
+    navigator.share({ title: 'Where Should I Travel?', text: txt, url: location.href });
+  } else {
+    navigator.clipboard?.writeText(txt).then(() => toast('Copied to clipboard ✓'));
+  }
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2600);
+}
+
+/* ═══════════════════════════════════════
+   CONFETTI
+═══════════════════════════════════════ */
+function confetti() {
+  const cols = ['#7c3aed','#38bdf8','#f472b6','#fbbf24','#34d399','#fb923c'];
+  for (let i = 0; i < 70; i++) {
+    setTimeout(() => {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      const size = Math.random() * 9 + 4;
+      Object.assign(c.style, {
+        left: Math.random() * 100 + 'vw',
+        width: size + 'px',
+        height: size + 'px',
+        background: cols[Math.floor(Math.random() * cols.length)],
+        animationDuration: (Math.random() * 2 + 2.2) + 's',
+        animationDelay: (Math.random() * .6) + 's',
+        borderRadius: Math.random() > .5 ? '50%' : '2px',
+      });
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 3800);
+    }, i * 28);
+  }
+}
+</script>
+</body>
